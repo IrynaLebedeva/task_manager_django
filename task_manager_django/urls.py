@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 from manager.views import TaskCreateView
+from manager import views
 
 router = DefaultRouter()
 router.register(r'task', TaskCreateView, basename='task')
@@ -25,5 +26,7 @@ router.register(r'task', TaskCreateView, basename='task')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('api/v1/tasks/', views.get_tasks_list, name='tasks_list'),
+    path('api/v1/tasks/<int:pk>', views.get_tasks_detail, name='tasks_detail'),
 ]
