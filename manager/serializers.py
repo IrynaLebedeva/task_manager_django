@@ -1,4 +1,7 @@
+from datetime import timezone
+
 from rest_framework import serializers
+
 from .models import Task, Category, SubTask
 
 
@@ -12,7 +15,7 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
     class Meta:
         model = SubTask
-        fields = ('id', 'title', 'description', 'status', 'deadline')
+        fields = ('id', 'title', 'task', 'deadline','created_at')
 
 
 class CategoryCreateSerializer(serializers.ModelSerializer):
@@ -26,13 +29,19 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        return Category.objects.create(**validated_data)
+        name = validated_data.get('name')
+        if Category.objects.filter(name__iexact=name).exists():
+            raise serializers.ValidationError("Category with this name already exists")
+        category = Category.objects.create(**validated_data)
+        return category
 
     def update(self, instance, validated_data):
         new_name = validated_data.get('name', instance.name)
-        if Category.objects.filter(name=new_name).exclude(id=instance.id).exists():
+        if Category.objects.filter(name__iexact=new_name).exclude(id=instance.id).exists():
             raise serializers.ValidationError("Category with this name already exists")
-        return super().update(instance, validated_data)
+        instance.name = new_name
+        instance.save()
+        return instance
 
 class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,3 +55,8 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         model = Task
         fields = ('id', 'title', 'description', 'status', 'deadline', 'created_at', 'subtasks')
 
+class TaskCreateSerializer(serializers.ModelSerializer):
+    def validate_deadline(self, value):
+        if value < timezone.now():
+            raise serializers.ValidationError("Deadline cannot be in the past")
+        return value
