@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
-from manager.views import TaskCreateView, SubTaskListCreateView, SubTaskDetailUpdateDeleteView
+from manager.views import TaskCreateView, SubTaskListCreateView, SubTaskDetailUpdateDeleteView, TaskByDayView
 from manager import views
 
 router = DefaultRouter()
@@ -31,4 +31,6 @@ urlpatterns = [
     path('api/v1/tasks/<int:pk>', views.get_tasks_detail, name='tasks_detail'),
     path('api/v1/subtasks/', SubTaskListCreateView.as_view(), name='subtasks_list_create'),
     path('api/v1/subtasks/<int:pk>', SubTaskDetailUpdateDeleteView.as_view(), name='subtasks_detail_update_delete'),
+    path('api/v1/tasks/by_day/', TaskByDayView.as_view(), name='tasks_by_day'),
+    # path('api/v1/subtasks/filter/', SubTaskFilterView.as_view(), name='subtasks_filter')
 ]
